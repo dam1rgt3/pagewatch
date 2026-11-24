@@ -44,6 +44,7 @@ function invalidate() {
 function fields() {
   const mode=get("mode").value;
   get("target-fields").hidden=mode==="title";
+  get("discovered").hidden=true;
   get("target-label").textContent=mode==="heading"?"Heading on the page":"Element selector";
   get("target").placeholder=mode==="heading"?"e.g. Registration deadline":"e.g. #price";
   get("target-hint").textContent=mode==="heading"?"Copy the heading from the page, or preview to discover available headings.":
@@ -76,13 +77,17 @@ function inert(html) {
   template.innerHTML=html;
   return template.content;
 }
-get("address").addEventListener("input",()=>{invalidate();cachedPage=null;get("heading-list").replaceChildren();});
+get("address").addEventListener("input",()=>{invalidate();cachedPage=null;get("discovered").hidden=true;get("heading-list").replaceChildren();});
 get("target").addEventListener("input",invalidate);
 get("mode").addEventListener("change",()=>{invalidate();get("target").value="";fields();});
 get("sample").onclick=()=>{
   get("address").value=location.hostname.endsWith(".github.io")?new URL("workshop.html",location.href).href:"https://dam1rgt3.github.io/pagewatch/workshop.html";
   get("mode").value="heading";get("target").value="Registration deadline";
   invalidate();fields();get("watch-form").requestSubmit();
+};
+get("found-headings").onchange=()=>{
+  const chosen=get("found-headings").value;
+  if(chosen){get("target").value=chosen;get("watch-form").requestSubmit();}
 };
 get("watch-form").onsubmit=async event=>{
   event.preventDefault();invalidate();const ticket=generation;
@@ -95,6 +100,11 @@ get("watch-form").onsubmit=async event=>{
     const root=inert(html);
     const options=listHeadings(root).map(h=>{const o=make("option");o.value=h;return o;});
     get("heading-list").replaceChildren(...options);
+    const chooser=get("found-headings");
+    const prompt=make("option","Choose a heading…");prompt.value="";
+    chooser.replaceChildren(prompt,...options.map(o=>{const item=make("option",o.value);item.value=o.value;return item;}));
+    chooser.value=get("target").value;
+    get("discovered").hidden=get("mode").value!=="heading"||!options.length;
     if(get("mode").value==="heading"&&!get("target").value.trim()){
       get("target").focus();
       feedback(options.length?"Choose one of the headings, then preview again.":"No headings found. Try Page title or Specific page element.");

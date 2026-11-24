@@ -6,8 +6,8 @@ Track a specific part of a public web page. Choose its title, the text under a h
 
 ## Try a watch
 
-1. Open the site and choose **Use a sample**, or paste a URL and choose **Preview selection**.
-2. For a section, enter the heading as printed on the source page. Previewing with an empty heading lists available headings when the source permits browser reads. For an element, enter a unique ID, class or attribute selector, such as `#deadline` or `[itemprop="price"]`.
+1. Open the site and choose **Use a sample**, or paste a URL and choose **Preview selection**. The sample workshop also has a [scheduled public watch](https://github.com/dam1rgt3/pagewatch/issues/1).
+2. For a section, enter the heading as printed on the source page. Previewing lists available headings when the source permits browser reads. Choosing one from the menu immediately previews its text. For an element, enter a unique ID, class or attribute selector, such as `#deadline` or `[itemprop="price"]`.
 3. Choose **Save in this browser** to keep a personal watch. Click **Check now** when you want another reading. These watches stay in browser storage, so clearing site data removes them.
 4. For background checks, choose **Set up on GitHub** and submit the prefilled issue. Public watch setup requires a GitHub account; viewing the dashboard does not. Its URL, selection, captured text and earlier versions are public, including in the repository’s Git history. Use public information only. Close the issue to stop checks or edit its configuration to choose a different target.
 

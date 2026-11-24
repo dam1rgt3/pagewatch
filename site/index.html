@@ -26,7 +26,7 @@
         <label for="address">Page URL</label><input id="address" type="url" required placeholder="https://example.com/events">
         <label for="mode">What should we watch?</label>
         <select id="mode"><option value="title">Page title</option><option value="heading">Text under a heading</option><option value="element">Specific page element</option></select>
-        <div id="target-fields" hidden><label id="target-label" for="target">Heading</label><input id="target" maxlength="160" list="heading-list"><datalist id="heading-list"></datalist><p id="target-hint" class="help"></p></div>
+        <div id="target-fields" hidden><label id="target-label" for="target">Heading</label><input id="target" maxlength="160" list="heading-list"><datalist id="heading-list"></datalist><div id="discovered" hidden><label for="found-headings">Headings found on this page</label><select id="found-headings"></select></div><p id="target-hint" class="help"></p></div>
         <button class="primary-action" type="submit">Preview selection</button>
       </form>
       <p id="preview-status" class="feedback" role="status"></p>

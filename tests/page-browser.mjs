@@ -11,6 +11,10 @@ try {
   assert.equal(response.status(),200);
   await page.getByRole("button",{name:"Use a sample"}).click();
   await page.locator("#preview-panel").waitFor();
+  await page.locator("#found-headings").selectOption("Venue");
+  await page.getByText("Community Hall, Room 2.",{exact:true}).waitFor();
+  await page.locator("#found-headings").selectOption("Registration deadline");
+  await page.locator("#preview-panel").waitFor();
   const baseline=await page.locator("#preview-value").textContent();
   assert.match(baseline,/Register by May \d+, 2027/);
   assert.ok(!baseline.includes("Community Hall"));
