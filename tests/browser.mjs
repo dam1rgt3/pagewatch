@@ -43,8 +43,9 @@ try {
   sample.events=[{key:first,at:"2026-01-02T12:00:00Z",type:"updated",before:{...role,location:"Remote"},after:role}];
   await page.route("**/data/watch.json",route=>route.fulfill({json:sample}));
   await page.reload();
-  await page.getByText("Previous location",{exact:true}).waitFor();
-  await page.getByText("Updated location",{exact:true}).waitFor();
-  assert.deepEqual(await page.locator("#results .comparison strong").allTextContents(),["Remote","Hybrid"]);
+  const results=page.locator("#results");
+  await results.getByText("Previous location",{exact:true}).waitFor();
+  await results.getByText("Updated location",{exact:true}).waitFor();
+  assert.deepEqual(await results.locator(".comparison strong").allTextContents(),["Remote","Hybrid"]);
   console.log("Passed live feed, search, source selection, example, mobile width and comparison rendering.");
 } finally {await browser.close();}
