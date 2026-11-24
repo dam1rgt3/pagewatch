@@ -13,7 +13,8 @@ else
   git -C "$history_dir" switch --orphan history
 fi
 node scripts/collect.mjs "$history_dir/watch.json"
-git -C "$history_dir" add -- watch.json
-git -C "$history_dir" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Record careers board check"
+cp site/data/pages.json "$history_dir/pages.json"
+git -C "$history_dir" add -- watch.json pages.json
+git -C "$history_dir" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Record page and careers checks"
 git push origin history:refs/heads/history
 cp "$history_dir/watch.json" site/data/watch.json

@@ -7,7 +7,7 @@ try {
   const page=await browser.newPage({viewport:{width:1280,height:850}});
   const errors=[];
   page.on("pageerror",e=>errors.push(e.message));
-  const res=await page.goto(url.href);
+  const res=await page.goto(new URL("careers.html",url).href);
   assert.equal(res.status(),200);
   const watch=await page.request.get(new URL("data/watch.json",url).href);
   assert.equal(watch.status(),200);

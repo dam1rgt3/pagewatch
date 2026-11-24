@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import {pathToFileURL} from "node:url";
+const {chromium}=await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
+const base=new URL(process.env.SITE_URL);
+const browser=await chromium.launch({executablePath:process.env.CHROME_PATH});
+try {
+  const page=await browser.newPage();
+  const errors=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  const response=await page.goto(base.href);
+  assert.equal(response.status(),200);
+  await page.getByRole("button",{name:"Use a sample"}).click();
+  await page.locator("#preview-panel").waitFor();
+  const baseline=await page.locator("#preview-value").textContent();
+  assert.match(baseline,/Register by May \d+, 2027/);
+  assert.ok(!baseline.includes("Community Hall"));
+  await page.getByRole("button",{name:"Save in this browser"}).click();
+  const personal=page.locator("#watch-list .watch-item");
+  await personal.first().waitFor();
+  assert.equal(await personal.count(),1);
+  await page.reload();
+  await page.getByRole("button",{name:"This browser",exact:true}).click();
+  await personal.first().waitFor();
+  assert.equal(await personal.locator("blockquote").textContent(),baseline);
+  await page.route("**/workshop.html",r=>r.fulfill({contentType:"text/html",body:"<main><h2>Registration deadline</h2><p>Register by June 21, 2027 at 5 pm.</p><h2>Venue</h2><p>New hall</p></main>"}));
+  await page.getByRole("button",{name:"Check now"}).click();
+  await personal.locator("ins").first().waitFor();
+  assert.equal(await personal.locator(".diff section p").first().textContent(),baseline);
+  assert.equal(await personal.locator(".diff section p").last().textContent(),"Register by June 21, 2027 at 5 pm.");
+  assert.ok(!(await personal.textContent()).includes("New hall"));
+  await page.unroute("**/workshop.html");
+  await page.getByRole("button",{name:"Use a sample"}).click();
+  await page.locator("#preview-panel").waitFor();
+  await page.context().route("https://github.com/**/issues/new?**",r=>r.fulfill({contentType:"text/html",body:"<title>Watch registration test</title>"}));
+  const opening=page.waitForEvent("popup");
+  await page.getByRole("button",{name:"Set up on GitHub"}).click();
+  const popup=await opening;await popup.waitForLoadState();
+  const target=new URL(popup.url());
+  assert.equal(target.pathname,"/dam1rgt3/pagewatch/issues/new");
+  assert.match(target.searchParams.get("body"),/Registration deadline/);
+  await popup.close();
+  await page.getByRole("button",{name:"Scheduled",exact:true}).click();
+  const data=await (await page.request.get(new URL("data/pages.json",base).href)).json();
+  assert.equal(data.version,1);
+  for (const [id,w] of Object.entries(data.watches)) {
+    const live=page.locator(".watch-item").filter({has:page.locator('a[href$="/issues/'+id+'"]')});
+    await live.first().waitFor();
+    if(w.lastSuccess) assert.equal(await live.locator("blockquote").textContent(),w.value);
+  }
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  assert.deepEqual(errors,[]);
+  console.log("Verified published page selection, private save, persistence, highlighted diff, public registration link, scheduled watches and mobile width.");
+} finally {await browser.close();}

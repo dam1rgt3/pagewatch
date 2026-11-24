@@ -2,6 +2,8 @@ name: Check boards and publish
 on:
   schedule:
     - cron: '17 2,8,14,20 * * *'
+  issues:
+    types: [opened, edited, reopened, closed]
   workflow_dispatch:
   push:
     branches: [main]
@@ -13,7 +15,56 @@ concurrency:
 permissions: {}
 
 jobs:
+  scan-pages:
+    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[PageWatch] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Read the previous page snapshot if present
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .previous
+          if git ls-remote --exit-code --heads origin refs/heads/history >/dev/null; then
+            git fetch --no-tags --depth=1 origin refs/heads/history:refs/remotes/origin/history
+            if git cat-file -e refs/remotes/origin/history:pages.json; then
+              git show refs/remotes/origin/history:pages.json > .previous/pages.json
+            fi
+          else
+            status=$?
+            if (( status != 2 )); then exit "$status"; fi
+          fi
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Install HTML parsing dependencies
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          echo "BOOTSTRAP_LOCK=$(base64 -w0 package-lock.json)"
+      - name: Test page and job comparisons
+        run: npm test
+      - name: Read public watch registrations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100&sort=created&direction=asc" > "$RUNNER_TEMP/issues.json"
+      - name: Check selected page text
+        run: node scripts/check-pages.mjs "$RUNNER_TEMP/issues.json" .previous/pages.json "$RUNNER_TEMP/pages.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: page-snapshots
+          path: ${{ runner.temp }}/pages.json
+          retention-days: 1
+
   collect:
+    needs: scan-pages
     runs-on: ubuntu-latest
     timeout-minutes: 6
     permissions:
@@ -25,8 +76,10 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-      - name: Test change detection
-        run: npm test
+      - uses: actions/download-artifact@v4
+        with:
+          name: page-snapshots
+          path: site/data
       - name: Collect boards and save history
         run: bash scripts/update-history.sh
       - uses: actions/upload-pages-artifact@v3
@@ -70,3 +123,4 @@ jobs:
           export PLAYWRIGHT_PATH="$RUNNER_TEMP/pw/node_modules/playwright-core/index.mjs"
           export CHROME_PATH="$(command -v google-chrome)"
           node tests/browser.mjs
+          node tests/page-browser.mjs

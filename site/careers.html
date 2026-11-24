@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="See which roles opened, moved or disappeared across three public careers pages. Compare the original wording and follow the source.">
+  <meta name="theme-color" content="#f4f4ed">
+  <title>PageWatch — Careers watch</title>
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap masthead"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">≋</span>PageWatch</a><nav class="section-links" aria-label="Main navigation"><a class="source-link" href="./">Page watches</a> · <a class="source-link" href="https://github.com/dam1rgt3/pagewatch">GitHub ↗</a></nav></div></header>
+<main class="wrap">
+  <section class="intro">
+    <div><h1>Careers watch<span>.</span></h1><p>Follow openings and see exactly what changed on the original job boards.</p></div>
+    <div class="last-check"><span id="check-label">Latest check</span><strong id="checked">Loading…</strong></div>
+  </section>
+  <div class="layout">
+    <aside>
+      <h2>Sources</h2><nav id="sources" aria-label="Filter by company"></nav>
+      <div class="method"><strong>How tracking works</strong><p>Boards are checked four times a day. A removal appears after two successful checks confirm that a posting is absent.</p><button type="button" id="example">View an example <span aria-hidden="true">↗</span></button></div>
+    </aside>
+    <section class="content" aria-label="Careers monitor">
+      <div class="tabs" aria-label="View"><button type="button" id="changes" disabled aria-pressed="true">Changes</button><button type="button" id="roles" disabled aria-pressed="false">Open roles</button></div>
+      <div class="controls"><label for="query">Search roles or locations</label><input id="query" type="search" placeholder="e.g. product designer, London" autocomplete="off"></div>
+      <p id="board-status" hidden></p><div class="results-meta"><strong id="result-count" aria-live="polite"></strong><span id="period"></span></div>
+      <div id="results"><p>Loading job boards…</p></div><button type="button" id="more" hidden>Show more</button>
+    </section>
+  </div>
+</main>
+<dialog id="example-dialog"><div class="dialog-heading"><span class="kicker">Fictional example</span><button type="button" id="dismiss" aria-label="Close example">Close ×</button></div><h2>A role changes location.</h2><p>The same posting ID appears on both checks. PageWatch shows the exact field that changed.</p><div class="comparison"><div><small>Previous location</small><strong>Remote, US</strong></div><div><small>Updated location</small><strong>San Francisco, CA · Hybrid</strong></div></div></dialog>
+<footer class="wrap foot"><span>PageWatch</span><a href="https://github.com/dam1rgt3/pagewatch#how-it-works">Data and methodology ↗</a></footer>
+<script type="module" src="app.js"></script>
+</body></html>

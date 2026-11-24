@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Track meaningful changes on public job boards.",
+  "description": "Watch selected parts of public pages and track changes across job boards.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "collect": "node scripts/collect.mjs",
-    "test": "node --test tests/monitor.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "start": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "linkedom": "0.18.12",
+    "ipaddr.js": "2.2.0"
   }
 }
