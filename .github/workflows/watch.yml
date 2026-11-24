@@ -1,0 +1,72 @@
+name: Check boards and publish
+on:
+  schedule:
+    - cron: '17 2,8,14,20 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+
+concurrency:
+  group: pagewatch-publication
+  cancel-in-progress: false
+permissions: {}
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Test change detection
+        run: npm test
+      - name: Collect boards and save history
+        run: bash scripts/update-history.sh
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  publish:
+    needs: collect
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    outputs:
+      site: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: pages
+
+  verify:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Check the public dashboard in Chrome
+        env:
+          SITE_URL: ${{ needs.publish.outputs.site }}
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pw" --ignore-scripts --no-audit --no-fund playwright-core@1.65.1
+          export PLAYWRIGHT_PATH="$RUNNER_TEMP/pw/node_modules/playwright-core/index.mjs"
+          export CHROME_PATH="$(command -v google-chrome)"
+          node tests/browser.mjs

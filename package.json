@@ -1,0 +1,15 @@
+{
+  "name": "pagewatch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Track meaningful changes on public job boards.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "collect": "node scripts/collect.mjs",
+    "test": "node --test tests/monitor.test.mjs",
+    "start": "node scripts/serve.mjs"
+  }
+}
