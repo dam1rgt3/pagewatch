@@ -45,6 +45,6 @@ try {
   await page.reload();
   await page.getByText("Previous location",{exact:true}).waitFor();
   await page.getByText("Updated location",{exact:true}).waitFor();
-  assert.deepEqual(await page.locator(".comparison strong").allTextContents(),["Remote","Hybrid"]);
+  assert.deepEqual(await page.locator("#results .comparison strong").allTextContents(),["Remote","Hybrid"]);
   console.log("Passed live feed, search, source selection, example, mobile width and comparison rendering.");
 } finally {await browser.close();}
