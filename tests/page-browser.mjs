@@ -16,6 +16,16 @@ try {
   await page.locator("#found-headings").selectOption("Registration deadline");
   await page.locator("#preview-panel").waitFor();
   const baseline=await page.locator("#preview-value").textContent();
+  await page.locator("#mode").selectOption("title");
+  await page.getByRole("button",{name:"Preview selection"}).click();
+  await page.getByText("Community workshop notice | PageWatch sample",{exact:true}).waitFor();
+  await page.locator("#mode").selectOption("element");
+  await page.locator("#target").fill("#deadline");
+  await page.getByRole("button",{name:"Preview selection"}).click();
+  await page.locator("#preview-panel").waitFor();
+  assert.equal(await page.locator("#preview-value").textContent(),baseline);
+  await page.getByRole("button",{name:"Use a sample"}).click();
+  await page.locator("#preview-panel").waitFor();
   assert.match(baseline,/Register by May \d+, 2027/);
   assert.ok(!baseline.includes("Community Hall"));
   await page.getByRole("button",{name:"Save in this browser"}).click();
@@ -50,6 +60,11 @@ try {
     const live=page.locator(".watch-item").filter({has:page.locator('a[href$="/issues/'+id+'"]')});
     await live.first().waitFor();
     if(w.lastSuccess) assert.equal(await live.locator("blockquote").textContent(),w.value);
+    if(w.changes.length) {
+      const first=live.locator(".diff").first();
+      assert.deepEqual(await first.locator("section p").allTextContents(),[w.changes[0].before,w.changes[0].after]);
+      assert.ok(await first.locator("ins,del").count());
+    }
   }
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
